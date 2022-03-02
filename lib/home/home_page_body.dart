@@ -23,7 +23,7 @@ class _HomePageBodyState extends State<HomePageBody> {
     super.initState();
     pageController.addListener(() {
       setState(() {
-        _currPageValue-pageController.page!;
+        _currPageValue=pageController.page!;
       });
     });
   }
@@ -51,26 +51,26 @@ class _HomePageBodyState extends State<HomePageBody> {
   Widget _buildPageItem(int position) {
     Matrix4 matrix = new Matrix4.identity();
 
-    if(position==-_currPageValue.floor()){
+    if(position==_currPageValue.floor()){
       var currScale=1-(_currPageValue-position)*(1-_scaleFactor);
       var currTrans=_height*(1-currScale)/2;
-      matrix=Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(1, currTrans, 1);
+      matrix=Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(0, currTrans, 0);
     }
-    else if(position==-_currPageValue.floor()+1){
+    else if(position==_currPageValue.floor()+1){
       var currScale=_scaleFactor+(_currPageValue-position+1)*(1-_scaleFactor);
       var currTrans=_height*(1-currScale)/2;
       matrix=Matrix4.diagonal3Values(1, currScale, 1);
-      matrix=Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(1, currTrans, 1);
+      matrix=Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(0, currTrans, 0);
     }
-    else if(position==-_currPageValue.floor()-1){
+    else if(position==_currPageValue.floor()-1){
       var currScale=1-(_currPageValue-position)*(1-_scaleFactor);
       var currTrans=_height*(1-currScale)/2;
       matrix=Matrix4.diagonal3Values(1, currScale, 1);
-      matrix=Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(1, currTrans, 1);
+      matrix=Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(0, currTrans, 0);
     }
     else{
       var currScale=0.8;
-      matrix=Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(1, _height*(1-_scaleFactor)/2, 1);
+      matrix=Matrix4.diagonal3Values(1, currScale, 1)..setTranslationRaw(0, _height*(1-_scaleFactor)/2, 1);
     }
 
     return Transform(
