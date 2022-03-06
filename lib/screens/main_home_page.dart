@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_ui_library/home/home_page_body.dart';
+import 'package:my_ui_library/screens/home_page_body.dart';
+
 import 'package:my_ui_library/widgets/big_text.dart';
 import 'package:my_ui_library/widgets/small_text.dart';
 
@@ -43,7 +44,7 @@ class _MainHomePageState extends State<MainHomePage> {
                         borderRadius: BorderRadius.circular(15),
                         color: Colors.indigoAccent
                       ),
-                      child: Icon(Icons.search, color: Colors.white,),
+                      child: Icon(Icons.search, color: Colors.white, size:24), //default icon size is 24
 
                     ),
                   )
@@ -51,7 +52,8 @@ class _MainHomePageState extends State<MainHomePage> {
               ),
             ),
           ),
-          HomePageBody()
+          Expanded(child: SingleChildScrollView(child: HomePageBody())),
+
         ],
       ),
     );

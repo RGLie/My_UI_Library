@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:my_ui_library/home/main_home_page.dart';
+import 'package:my_ui_library/screens/main_home_page.dart';
+import 'package:get/get.dart';
+import 'package:my_ui_library/screens/popular_food_detail.dart';
+import 'package:my_ui_library/screens/recommended_detail.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,7 +14,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -26,7 +29,9 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MainHomePage(),
+      //home: MainHomePage(),
+      //home: PopularFoodDetail(),
+      home: RecommendedDetail(),
     );
   }
 }
