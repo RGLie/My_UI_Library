@@ -69,7 +69,54 @@ class RecommendedDetail extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Container(
+            padding: EdgeInsets.only(left:50, right: 50, top: 10, bottom: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppIcon(icon: Icons.remove, backgroundColor: Colors.lightGreen, iconColor: Colors.white,),
+                BigText(text: "\$130"+" X "+"0"),
+                AppIcon(icon: Icons.add, backgroundColor: Colors.lightGreen, iconColor: Colors.white,),
+              ],
+            ),
+          ),
+          Container(
+            height: 120,
+            padding: EdgeInsets.only(top: 30, bottom: 30, left: 20, right: 20),
+            decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40)
+                )
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white
+                  ),
+                  child: Icon(
+                    Icons.favorite,
+                    color: Colors.lightGreen,
+                  )
+                ),
+                Container(
+                  padding: EdgeInsets.all(20),
+                  child: BigText(text: "\$10 | Add to cart",),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.lightGreen
+                  ),
+                )
+              ],
+            ),
+          )
 
         ],
       ),

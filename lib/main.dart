@@ -3,8 +3,13 @@ import 'package:my_ui_library/screens/main_home_page.dart';
 import 'package:get/get.dart';
 import 'package:my_ui_library/screens/popular_food_detail.dart';
 import 'package:my_ui_library/screens/recommended_detail.dart';
+import'helper/dependencies.dart' as dep;
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await dep.init();
+
   runApp(const MyApp());
 }
 
@@ -29,8 +34,8 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      //home: MainHomePage(),
-      //home: PopularFoodDetail(),
+      // home: MainHomePage(),
+      // home: PopularFoodDetail(),
       home: RecommendedDetail(),
     );
   }
