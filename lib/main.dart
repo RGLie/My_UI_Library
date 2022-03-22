@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:my_ui_library/animations/animation1.dart';
+import 'package:my_ui_library/animations/animation_home.dart';
 import 'package:my_ui_library/screens/main_home_page.dart';
 import 'package:get/get.dart';
 import 'package:my_ui_library/screens/popular_food_detail.dart';
 import 'package:my_ui_library/screens/recommended_detail.dart';
-import'helper/dependencies.dart' as dep;
+
 
 void main() async{
-  WidgetsFlutterBinding.ensureInitialized();
-
-  await dep.init();
-
   runApp(const MyApp());
 }
 
@@ -19,6 +17,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    //
+    // Get.find<PopularProductController>().getpopularProductList();
+
     return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
@@ -34,9 +35,10 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      // home: MainHomePage(),
+      // home: MainHomePage(),ypy
       // home: PopularFoodDetail(),
-      home: RecommendedDetail(),
+      //home: RecommendedDetail(),
+      home: AnimationHomePage(),
     );
   }
 }
