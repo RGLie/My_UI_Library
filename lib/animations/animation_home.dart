@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_ui_library/animations/animation1.dart';
 import 'package:my_ui_library/animations/animation2.dart';
+import 'package:my_ui_library/animations/animation3.dart';
+
+import 'animation4.dart';
+import 'animation5.dart';
 
 class AnimationHomePage extends StatefulWidget {
   const AnimationHomePage({Key? key}) : super(key: key);
@@ -14,12 +18,16 @@ class _AnimationHomePageState extends State<AnimationHomePage> {
     '1',
     '2',
     '3',
+    '4',
+    '5',
   ];
 
   List pages=[
     FirstAnimation(),
     Animation2(),
-    Animation2(),
+    Animation3(),
+    Animation4(),
+    Animation5(),
   ];
 
 

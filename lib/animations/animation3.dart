@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-class Animation2 extends StatefulWidget {
-  const Animation2({Key? key}) : super(key: key);
+class Animation3 extends StatefulWidget {
+  const Animation3({Key? key}) : super(key: key);
 
   @override
-  _Animation2State createState() => _Animation2State();
+  _Animation3State createState() => _Animation3State();
 }
 
-class _Animation2State extends State<Animation2> with SingleTickerProviderStateMixin{
+class _Animation3State extends State<Animation3> with SingleTickerProviderStateMixin{
   late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: Duration(seconds: 3),
+      duration: Duration(seconds: 2),
       vsync: this
     );
     _animationController.repeat();
@@ -24,27 +24,27 @@ class _Animation2State extends State<Animation2> with SingleTickerProviderStateM
   void dispose(){
     _animationController.dispose();
     super.dispose();
+    //_animation.dispose();
 
   }
-
 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Animation 2"),
+        title: Text("Animation 3"),
       ),
       body: _buildbody(),
     );
   }
 
   Widget _buildbody() {
-    Animation<double> _animation = Tween(begin: 0.0, end: 2.0).animate(_animationController);
+    Animation<double> _animation = Tween(begin: 1.0, end: 0.0).animate(_animationController);
     return Center(
       //size, rotation, position, rotation
-      child: ScaleTransition(
-        scale: _animation,
+      child: FadeTransition(
+        opacity: _animation,
         child: Container(
           width: 200,
           height: 200,
