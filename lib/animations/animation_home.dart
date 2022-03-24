@@ -5,6 +5,8 @@ import 'package:my_ui_library/animations/animation3.dart';
 
 import 'animation4.dart';
 import 'animation5.dart';
+import 'animation6.dart';
+import 'animation7.dart';
 
 class AnimationHomePage extends StatefulWidget {
   const AnimationHomePage({Key? key}) : super(key: key);
@@ -15,11 +17,13 @@ class AnimationHomePage extends StatefulWidget {
 
 class _AnimationHomePageState extends State<AnimationHomePage> {
   List title=[
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
+    '1. Animated Container',
+    '2. ScaleTransition',
+    '3. FadeTransition',
+    '4. PositionedTransition',
+    '5. Rotation',
+    '6. AnimatedSwitcher',
+    '7. AnimatedOpacity',
   ];
 
   List pages=[
@@ -28,6 +32,8 @@ class _AnimationHomePageState extends State<AnimationHomePage> {
     Animation3(),
     Animation4(),
     Animation5(),
+    Animation6(),
+    Animation7(),
   ];
 
 
