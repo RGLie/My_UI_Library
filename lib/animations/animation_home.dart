@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_ui_library/animations/animation1.dart';
+
 import 'package:my_ui_library/animations/animation2.dart';
 import 'package:my_ui_library/animations/animation3.dart';
+import 'package:my_ui_library/animations/animation8.dart';
+import 'package:my_ui_library/animations/animation9.dart';
 
 import 'animation4.dart';
 import 'animation5.dart';
@@ -24,6 +27,9 @@ class _AnimationHomePageState extends State<AnimationHomePage> {
     '5. Rotation',
     '6. AnimatedSwitcher',
     '7. AnimatedOpacity',
+    '8. Animated Default Text Style',
+    '9. animated_text_kit',
+
   ];
 
   List pages=[
@@ -34,6 +40,9 @@ class _AnimationHomePageState extends State<AnimationHomePage> {
     Animation5(),
     Animation6(),
     Animation7(),
+    Animation8(),
+    Animation9(),
+
   ];
 
 
