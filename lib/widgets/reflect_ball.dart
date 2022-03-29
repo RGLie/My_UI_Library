@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:my_ui_library/practice_and_work/global_var.dart';
 
 class ReflectBall extends StatefulWidget {
   final double mapXsize;
@@ -7,8 +6,8 @@ class ReflectBall extends StatefulWidget {
   final double xPosition;
   final double yPosition;
   final int ballRad;
-  final int xVector;
-  final int yVector;
+  final double xVector;
+  final double yVector;
   final double xSpeed;
   final double ySpeed;
 
@@ -18,8 +17,8 @@ class ReflectBall extends StatefulWidget {
     required this.xPosition,
     required this.yPosition,
     required this.ballRad,
-    required this.xVector,
-    required this.yVector,
+    this.xVector = 1,
+    this.yVector = 1,
     required this.xSpeed,
     required this.ySpeed
   }) : super(key: key);
@@ -30,21 +29,41 @@ class ReflectBall extends StatefulWidget {
 
 class _ReflectBallState extends State<ReflectBall> with SingleTickerProviderStateMixin{
   late AnimationController _animationController;
+  late double xPos;
+  late double yPos;
+  late double xVec;
+  late double yVec;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    xPos = widget.xPosition;
+    yPos = widget.yPosition;
+    xVec = widget.xVector;
+    yVec = widget.yVector;
+
     _animationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 10)
+        duration: Duration(milliseconds: 1)
     );
     _animationController.forward();
 
     _animationController.addStatusListener((status) {
       if(status == AnimationStatus.completed ){
+        setState(() {
+          if(xPos>=(widget.mapXsize - widget.ballRad) || xPos<=widget.ballRad){
+            xVec*=-1;
+          }
+          if(yPos>=(widget.mapYsize - widget.ballRad) || yPos<=widget.ballRad){
+            yVec*=-1;
+          }
 
+          xPos+=widget.xSpeed*xVec;
+          yPos+=widget.ySpeed*yVec;
 
+        });
         _animationController.value=0;
         _animationController.forward();
       }
@@ -59,6 +78,7 @@ class _ReflectBallState extends State<ReflectBall> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -69,10 +89,10 @@ class _ReflectBallState extends State<ReflectBall> with SingleTickerProviderStat
           child: CustomPaint(
             painter: _ball(
               animationValue: _animationController.value,
-              xVector: widget.xVector,
-              yVector: widget.yVector,
-              xPosition: widget.xPosition,
-              yPosition: widget.yPosition,
+              xVector: xVec,
+              yVector: yVec,
+              xPosition: xPos,
+              yPosition: yPos,
               ballRad: widget.ballRad,
               xSpeed: widget.xSpeed,
               ySpeed: widget.ySpeed
@@ -108,8 +128,6 @@ class _ball extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    double heightParameter = 30;
-    double periodParameter = 0.5;
 
     Paint paint = Paint()
       ..color = Colors.indigoAccent
