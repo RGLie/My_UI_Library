@@ -52,7 +52,7 @@ class _Work220326State extends State<Work220326> with SingleTickerProviderStateM
         return Container(
           width: 250,
           height: 250,
-          color: Colors.lightGreen,
+          color: Colors.white,
           child: CustomPaint(
             painter: _painter(
               animationValue: _animationController.value
@@ -81,14 +81,31 @@ class _painter extends CustomPainter {
 
     Path path = Path();
     // TODO: do operations here
-
+    path.moveTo(0, 250);
     for(double i=0; i<250; i++){
       path.lineTo(i,125 + heightParameter*sin(animationValue*pi*2+periodParameter*i*(pi/180)) );
-      path.moveTo(i, 0);
+      path.moveTo(i, 250);
     }
-    path.close();
+
+
+    Paint paint2 = Paint()
+      ..color = Color.fromRGBO(252, 194, 3, 0.7)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    Path wave_2 = Path();
+    wave_2.moveTo(0, 250);
+    for(double i=0; i<250; i++){
+      wave_2.lineTo(i,125 + heightParameter*sin(pi/3+animationValue*pi*2+periodParameter*i*(pi/180)) );
+      wave_2.moveTo(i, 250);
+    }
+
+
+
+    //path.close();
 
     canvas.drawPath(path, paint);
+    canvas.drawPath(wave_2, paint2);
   }
 
   @override

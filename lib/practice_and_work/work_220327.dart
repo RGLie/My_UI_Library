@@ -23,8 +23,8 @@ class _Work220327State extends State<Work220327> {
           mapYsize: 500,
           xPosition: 100,
           yPosition: 200,
-          xSpeed: 6,
-          ySpeed: 2,
+          xSpeed: 4,
+          ySpeed: 4,
         )
       ),
 

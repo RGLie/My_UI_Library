@@ -53,10 +53,10 @@ class _ReflectBallState extends State<ReflectBall> with SingleTickerProviderStat
     _animationController.addStatusListener((status) {
       if(status == AnimationStatus.completed ){
         setState(() {
-          if(xPos>=(widget.mapXsize - widget.ballRad) || xPos<=widget.ballRad){
+          if(xPos >= (widget.mapXsize - widget.ballRad) || xPos <= widget.ballRad){
             xVec*=-1;
           }
-          if(yPos>=(widget.mapYsize - widget.ballRad) || yPos<=widget.ballRad){
+          if(yPos >= (widget.mapYsize - widget.ballRad) || yPos <= widget.ballRad){
             yVec*=-1;
           }
 
@@ -78,7 +78,6 @@ class _ReflectBallState extends State<ReflectBall> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
