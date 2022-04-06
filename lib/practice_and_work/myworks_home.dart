@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_ui_library/practice_and_work/work_220326.dart';
 import 'package:my_ui_library/practice_and_work/work_220327.dart';
 import 'package:my_ui_library/practice_and_work/work_220403.dart';
+import 'package:my_ui_library/practice_and_work/work_220403_2.dart';
 
 
 class MyWork extends StatefulWidget {
@@ -15,13 +16,15 @@ class _MyWorkState extends State<MyWork> {
   List title=[
     '2022.03.26. Wave Animation',
     '2022.03.27. ',
-    '2022.04.03'
+    '2022.04.03',
+    '2022.04.03_2',
   ];
 
   List pages=[
     Work220326(),
     Work220327(),
     Work220403(),
+    Work220403_2(),
   ];
 
 

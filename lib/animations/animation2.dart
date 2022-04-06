@@ -40,16 +40,47 @@ class _Animation2State extends State<Animation2> with SingleTickerProviderStateM
   }
 
   Widget _buildbody() {
-    Animation<double> _animation = Tween(begin: 0.0, end: 2.0).animate(_animationController);
+    Animation<double> _animation = Tween(begin: 0.0, end: 1.0).animate(_animationController);
     return Center(
       //size, rotation, position, rotation
-      child: ScaleTransition(
-        scale: _animation,
-        child: Container(
-          width: 200,
-          height: 200,
-          color: Colors.indigoAccent,
-        ),
+      child: Column(
+        children: [
+          Container(
+            width: 400,
+            height: 100,
+            color: Colors.redAccent,
+          ),
+          ScaleTransition(
+            scale: _animation,
+            alignment: Alignment.topRight,
+            child: Container(
+              width: 200,
+              height: 200,
+              color: Colors.indigoAccent,
+            ),
+          ),
+          Container(
+            width: 400,
+            height: 100,
+            color: Colors.redAccent,
+          ),
+          SizeTransition(
+            sizeFactor: _animation,
+            //axis: Axis.horizontal,
+            //axisAlignment: 0,
+            child: Container(
+              width: 200,
+              height: 200,
+              color: Colors.indigoAccent,
+              child: Text("fadfd"),
+            ),
+          ),
+          Container(
+            width: 400,
+            height: 100,
+            color: Colors.redAccent,
+          ),
+        ],
       ),
     );
   }
