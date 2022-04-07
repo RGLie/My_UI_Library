@@ -2,20 +2,20 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class Work220403_2 extends StatefulWidget {
-  const Work220403_2({Key? key}) : super(key: key);
+class ComplicatedPhysics extends StatefulWidget {
+  const ComplicatedPhysics({Key? key}) : super(key: key);
 
   @override
-  _Work220403_2State createState() => _Work220403_2State();
+  _ComplicatedPhysicsState createState() => _ComplicatedPhysicsState();
 }
 
-class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderStateMixin{
+class _ComplicatedPhysicsState extends State<ComplicatedPhysics> with SingleTickerProviderStateMixin{
   bool isClick = false;
-  bool isClickAfter = true;
+  bool collapse = false;
   var ball = myBall.origin();
   late AnimationController _animationController;
-  double baseTime = 0.016;
-  double accel = 1000;
+  double baseTime = 0.001;
+  double accel = 40000;
 
   @override
   void initState() {
@@ -24,10 +24,41 @@ class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderSt
 
     _animationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 10)
+        duration: Duration(milliseconds: 16)
     );
-    _animationController.repeat();
+    _animationController.forward();
 
+    _animationController.addStatusListener((status) {
+      if(!isClick){
+        setState(() {
+          // if (ball.yPos + ball.ballRad > 300) {
+          //   ball.mulYvel(-1);
+          //   print("${ball.yVel}, ${ball.yPos}");
+          //   //ball.outVel();
+          // }
+
+          if (!collapse&&(ball.yVel.abs() *_animationController.value* baseTime + ball.yPos + ball.ballRad > 300)) {
+            ball.mulYvel(-0.9);
+            ball.subYpos(0.5 * accel * pow(baseTime, 2) - ball.yVel * baseTime);
+            ball.updateAnimation(_animationController.value);
+            collapse = true;
+            ball.outVel();
+            return;
+          }
+
+          ball.addYvel(baseTime * accel);
+          ball.subYpos(0.5 * accel * pow(baseTime, 2) - ball.yVel * baseTime);
+          //ball.updateDraw();
+          ball.updateAnimation(_animationController.value);
+          collapse=false;
+        });
+      }
+      if(status == AnimationStatus.completed ){
+
+        _animationController.value=0;
+        _animationController.forward();
+      }
+    });
   }
 
   @override
@@ -58,47 +89,25 @@ class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderSt
                 if (isClick) {
                   setState(() {
                     isClick = false;
-                    isClickAfter = true;
                   });
                 }
               },
               onHorizontalDragUpdate: (details) {
-                  if (isClick) {
-                    setState(() {
-                      ball.setPosition(details.localPosition.dx, details.localPosition.dy);
-                      ball.updateDraw();
-                    });
-                  }
+                if (isClick) {
+                  setState(() {
+                    ball.setPosition(details.localPosition.dx, details.localPosition.dy);
+                    ball.updateDraw();
+                  });
+                }
               },
 
-              child: AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  if (!isClick) {
-                    if (ball.yVel!=0 || isClickAfter) {
-                      ball.addYvel(baseTime * accel);
-                      ball.subYpos(0.5 * accel * pow(baseTime, 2) - ball.yVel * baseTime);
-                      ball.updateAnimation(_animationController.value);
-                      isClickAfter=false;
-
-                      if ((ball.yVel.abs()* baseTime + ball.yPos + ball.ballRad > 300)) {
-                        ball.mulYvel(-0.7);
-                        ball.outVel();
-                      }
-
-                    }
-
-
-                  }
-                  return Container(
-                    width: 300,
-                    height: 300,
-                    color: Colors.white70,
-                    child: CustomPaint(
-                      painter: _paint(ballPath: ball.draw),
-                    ),
-                  );
-                }
+              child: Container(
+                width: 300,
+                height: 300,
+                color: Colors.white70,
+                child: CustomPaint(
+                  painter: _paint(ballPath: ball.draw),
+                ),
               ),
             )
         )
@@ -153,8 +162,8 @@ class myBall{
     for(double i=0; i<ballRad-1; i++){
       draw.addOval(Rect.fromCircle(
           center: Offset(
-              xPos,
-              yPos,
+            xPos,
+            yPos,
           ),
           radius: i
       ));
@@ -208,10 +217,10 @@ class myBall{
   }
 
   void outVel(){
-    if(yVel.abs()<10){
+    if(yVel.abs()<500){
       yVel=0;
     }
-    if(xVel.abs()<10){
+    if(xVel.abs()<100){
       xVel=0;
     }
   }

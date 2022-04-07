@@ -46,24 +46,13 @@ class _ReflectBallState extends State<ReflectBall> with SingleTickerProviderStat
 
     _animationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 1)
+        duration: Duration(milliseconds: 1000)
     );
     _animationController.forward();
 
     _animationController.addStatusListener((status) {
       if(status == AnimationStatus.completed ){
-        setState(() {
-          if(xPos >= (widget.mapXsize - widget.ballRad) || xPos <= widget.ballRad){
-            xVec*=-1;
-          }
-          if(yPos >= (widget.mapYsize - widget.ballRad) || yPos <= widget.ballRad){
-            yVec*=-1;
-          }
 
-          xPos+=widget.xSpeed*xVec;
-          yPos+=widget.ySpeed*yVec;
-
-        });
         _animationController.value=0;
         _animationController.forward();
       }
@@ -81,10 +70,21 @@ class _ReflectBallState extends State<ReflectBall> with SingleTickerProviderStat
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
+        if(xPos >= (widget.mapXsize - widget.ballRad) || xPos <= widget.ballRad){
+          xVec*=-1;
+        }
+        if(yPos >= (widget.mapYsize - widget.ballRad) || yPos <= widget.ballRad){
+          yVec*=-1;
+        }
+
+        xPos+=widget.xSpeed*xVec;
+        yPos+=widget.ySpeed*yVec;
+
+        print(_animationController.value);
         return Container(
           width: widget.mapXsize,
           height: widget.mapYsize,
-          color: Colors.lightGreen,
+          color: Colors.greenAccent,
           child: CustomPaint(
             painter: _ball(
               animationValue: _animationController.value,
