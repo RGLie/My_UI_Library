@@ -12,6 +12,7 @@ class Work220403_2 extends StatefulWidget {
 class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderStateMixin{
   bool isClick = false;
   bool isClickAfter = true;
+  bool collapse = false;
   var ball = myBall.origin();
   late AnimationController _animationController;
   double baseTime = 0.016;
@@ -21,13 +22,11 @@ class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderSt
   void initState() {
     // TODO: implement initState
     super.initState();
-
     _animationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 10)
+        duration: Duration(milliseconds: 1)
     );
     _animationController.repeat();
-
   }
 
   @override
@@ -38,8 +37,6 @@ class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
         appBar: AppBar(
           title: Text("Bounce!!"),
@@ -80,15 +77,13 @@ class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderSt
                       ball.subYpos(0.5 * accel * pow(baseTime, 2) - ball.yVel * baseTime);
                       ball.updateAnimation(_animationController.value);
                       isClickAfter=false;
-
-                      if ((ball.yVel.abs()* baseTime + ball.yPos + ball.ballRad > 300)) {
+                      if ((ball.yVel>0)&&(ball.yVel.abs()* _animationController.value*baseTime + ball.yPos + ball.ballRad >= 300)) {
                         ball.mulYvel(-0.7);
+                        print("${ball.yVel}, ${ball.yPos}");
                         ball.outVel();
+
                       }
-
                     }
-
-
                   }
                   return Container(
                     width: 300,
@@ -129,8 +124,6 @@ class _paint extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 
-
-
 }
 
 
@@ -153,8 +146,7 @@ class myBall{
     for(double i=0; i<ballRad-1; i++){
       draw.addOval(Rect.fromCircle(
           center: Offset(
-              xPos,
-              yPos,
+              xPos, yPos
           ),
           radius: i
       ));
