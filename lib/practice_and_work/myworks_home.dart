@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_ui_library/practice_and_work/ComplicatedPhysics.dart';
 import 'package:my_ui_library/practice_and_work/work_220326.dart';
 import 'package:my_ui_library/practice_and_work/work_220327.dart';
 import 'package:my_ui_library/practice_and_work/work_220403.dart';
@@ -18,6 +19,7 @@ class _MyWorkState extends State<MyWork> {
     '2022.03.27. ',
     '2022.04.03',
     '2022.04.03_2',
+    '_ComplicatedPhysics',
   ];
 
   List pages=[
@@ -25,6 +27,7 @@ class _MyWorkState extends State<MyWork> {
     Work220327(),
     Work220403(),
     Work220403_2(),
+    ComplicatedPhysics(),
   ];
 
 

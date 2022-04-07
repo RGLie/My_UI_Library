@@ -11,9 +11,11 @@ class Work220403_2 extends StatefulWidget {
 
 class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderStateMixin{
   bool isClick = false;
+  bool collapse = false;
   var ball = myBall.origin();
   late AnimationController _animationController;
-  double baseTime = 0.002;
+  double baseTime = 0.001;
+  double accel = 40000;
 
   @override
   void initState() {
@@ -22,22 +24,37 @@ class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderSt
 
     _animationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 1)
+        duration: Duration(milliseconds: 16)
     );
     _animationController.forward();
 
     _animationController.addStatusListener((status) {
+      if(!isClick){
+      setState(() {
+        // if (ball.yPos + ball.ballRad > 300) {
+        //   ball.mulYvel(-1);
+        //   print("${ball.yVel}, ${ball.yPos}");
+        //   //ball.outVel();
+        // }
+
+        if (!collapse&&(ball.yVel.abs() *_animationController.value* baseTime + ball.yPos + ball.ballRad > 300)) {
+          ball.mulYvel(-0.9);
+          ball.subYpos(0.5 * accel * pow(baseTime, 2) - ball.yVel * baseTime);
+          ball.updateAnimation(_animationController.value);
+          collapse = true;
+          ball.outVel();
+          return;
+        }
+
+        ball.addYvel(baseTime * accel);
+        ball.subYpos(0.5 * accel * pow(baseTime, 2) - ball.yVel * baseTime);
+        //ball.updateDraw();
+        ball.updateAnimation(_animationController.value);
+        collapse=false;
+      });
+    }
       if(status == AnimationStatus.completed ){
-        setState(() {
-          if(!isClick){
-            if(ball.yPos+ball.ballRad > 300){
-              ball.mulYvel(-1);
-            }
 
-            
-
-          }
-        });
         _animationController.value=0;
         _animationController.forward();
       }
@@ -56,7 +73,7 @@ class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderSt
 
     return Scaffold(
         appBar: AppBar(
-          title: Text("Drag and Drop"),
+          title: Text("Bounce!!"),
         ),
         body: Center(
             child: GestureDetector(
@@ -69,25 +86,25 @@ class _Work220403_2State extends State<Work220403_2> with SingleTickerProviderSt
                 });
               },
               onHorizontalDragEnd: (details) {
-                setState(() {
-                  if (isClick) {
-                    isClick=false;
-                  }
-                });
-              },
-              onHorizontalDragUpdate: (details) {
-                if(isClick){
+                if (isClick) {
                   setState(() {
-                    ball.setPosition(details.localPosition.dx, details.localPosition.dy);
-                    ball.updateDraw();
+                    isClick = false;
                   });
                 }
+              },
+              onHorizontalDragUpdate: (details) {
+                  if (isClick) {
+                    setState(() {
+                      ball.setPosition(details.localPosition.dx, details.localPosition.dy);
+                      ball.updateDraw();
+                    });
+                  }
               },
 
               child: Container(
                 width: 300,
                 height: 300,
-                color: Colors.lightBlueAccent,
+                color: Colors.white70,
                 child: CustomPaint(
                   painter: _paint(ballPath: ball.draw),
                 ),
@@ -108,7 +125,7 @@ class _paint extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Paint paint = Paint()
-      ..color = Colors.indigoAccent
+      ..color = Colors.brown
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -133,6 +150,7 @@ class myBall{
   late double yVel;
   late double ballRad;
   late Path draw;
+  double baseTime = 0.002;
 
   myBall.origin(){
     xPos=100;
@@ -168,6 +186,23 @@ class myBall{
     yPos-=y;
   }
 
+  void addXvel(double x){
+    xVel+=x;
+  }
+
+  void subXvel(double x){
+    xVel-=x;
+  }
+
+  void addYvel(double y){
+    yVel+=y;
+  }
+
+  void subYvel(double y){
+    yVel-=y;
+  }
+
+
   void mulXvel(double v){
     xVel*=v;
   }
@@ -179,6 +214,15 @@ class myBall{
   void stop(){
     xVel=0;
     yVel=0;
+  }
+
+  void outVel(){
+    if(yVel.abs()<500){
+      yVel=0;
+    }
+    if(xVel.abs()<100){
+      xVel=0;
+    }
   }
 
   void setPosition(double x, double y){
@@ -200,6 +244,19 @@ class myBall{
           center: Offset(
             xPos,
             yPos,
+          ),
+          radius: i
+      ));
+    }
+  }
+
+  void updateAnimation(double animationValue){
+    draw=Path();
+    for(double i=0; i<ballRad-1; i++){
+      draw.addOval(Rect.fromCircle(
+          center: Offset(
+            xPos + animationValue*xVel*baseTime,
+            yPos + animationValue*yVel*baseTime,
           ),
           radius: i
       ));
