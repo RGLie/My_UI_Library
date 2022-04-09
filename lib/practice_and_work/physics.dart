@@ -12,8 +12,10 @@ class Physics extends StatefulWidget {
 class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
   bool isClick = false;
   bool isClickAfter = true;
-
-  var ball = myBall(100, 100, 0, 0, 20);
+  double mapY = 300;
+  double mapX = 300;
+  List objList = [];
+  var ball = myBall(100, 100, 300, 0, 20);
   var newball = myBall(200, 100, 0, 0, 30);
   late AnimationController _animationController;
   double baseTime = 0.016;
@@ -25,9 +27,11 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
     super.initState();
     _animationController = AnimationController(
         vsync: this,
-        duration: Duration(milliseconds: 1)
+        duration: Duration(milliseconds: 16)
     );
     _animationController.repeat();
+    objList.add(ball);
+    objList.add(newball);
   }
 
   @override
@@ -45,47 +49,74 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
         body: Center(
             child: GestureDetector(
               onHorizontalDragDown: (details) {
-                setState(() {
-                  if (ball.isBallRegion(details.localPosition.dx, details.localPosition.dy)) {
-                    isClick=true;
-                    ball.stop();
-                  }
-                });
-              },
-              onHorizontalDragEnd: (details) {
-                if (isClick) {
+                for(var i =0; i<objList.length; i++){
                   setState(() {
-                    isClick = false;
-                    isClickAfter = true;
+                    if (objList[i].isBallRegion(details.localPosition.dx, details.localPosition.dy)) {
+                      objList[i].isClick=true;
+                      objList[i].stop();
+                    }
                   });
                 }
               },
+              onHorizontalDragEnd: (details) {
+                for(var i =0; i<objList.length; i++){
+                  if (objList[i].isClick) {
+                    setState(() {
+                      objList[i].isClick = false;
+                      objList[i].isClickAfter = true;
+                    });
+                  }
+                }
+              },
               onHorizontalDragUpdate: (details) {
-                if (isClick) {
-                  setState(() {
-                    ball.setPosition(details.localPosition.dx, details.localPosition.dy);
-                    ball.updateDraw();
-                  });
+                for(var i =0; i<objList.length; i++){
+                  if (objList[i].isClick) {
+                    setState(() {
+                      objList[i].setPosition(details.localPosition.dx, details.localPosition.dy);
+                      objList[i].updateDraw();
+                    });
+                  }
                 }
               },
 
               child: AnimatedBuilder(
                   animation: _animationController,
                   builder: (context, child) {
-                    if (!isClick) {
-                      if (ball.yVel!=0 || isClickAfter) {
-                        ball.addYvel(baseTime * accel);
-                        ball.subYpos(0.5 * accel * pow(baseTime, 2) - ball.yVel * baseTime);
-                        ball.updateAnimation(_animationController.value);
-                        isClickAfter=false;
-                        if ((ball.yVel>0)&&(ball.yVel.abs()* _animationController.value*baseTime + ball.yPos + ball.ballRad >= 300)) {
-                          ball.mulYvel(-0.7);
-                          print("${ball.yVel}, ${ball.yPos}");
-                          ball.outVel();
+                    for(var i =0; i<objList.length; i++){
+                      if (!objList[i].isClick) {
 
+                        if (objList[i].yVel!=0 || objList[i].isClickAfter) {
+                          objList[i].addYvel(baseTime * accel);
+                          objList[i].subYpos(0.5 * accel * pow(baseTime, 2) - objList[i].yVel * baseTime);
+                          objList[i].updateAnimation(_animationController.value);
+                          objList[i].isClickAfter=false;
+                          if ((objList[i].yVel>=0)&&(objList[i].yVel* _animationController.value*baseTime + objList[i].yPos + objList[i].ballRad >= mapY)) {
+                            objList[i].mulYvel(-0.7);
+                            //print("${newball.yVel}, ${newball.yPos}");
+                            objList[i].outVel();
+                          }
                         }
+
+                        if (objList[i].yVel!=0) {
+                          print(ball.xVel);
+                          objList[i].addXpos( objList[i].xVel * baseTime);
+                          if ((objList[i].xVel* _animationController.value*baseTime + objList[i].xPos - objList[i].ballRad <=0)||(objList[i].xVel* _animationController.value*baseTime + objList[i].xPos + objList[i].ballRad >= mapX)) {
+
+                            objList[i].mulXvel(-0.8);
+                            //print("${newball.yVel}, ${newball.yPos}");
+                            //objList[i].outVel();
+                            objList[i].updateAnimation(_animationController.value);
+                          }
+                        }
+
+                        checkCollapse(objList);
                       }
+
+
+
                     }
+
+
                     return Container(
                       width: 300,
                       height: 300,
@@ -100,6 +131,18 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
         )
     );
   }
+}
+
+bool checkCollapse(List<dynamic> objList) {
+  for(int i=0; i<objList.length; i++){
+    for(int j=i; j<objList.length; j++){
+      if(objList[i].objType=='ball' && objList[j].objType=='ball'){
+        
+      }
+    }
+  }
+  return true;
+
 }
 
 class _paint extends CustomPainter {
@@ -140,6 +183,7 @@ class myBall{
   double baseTime = 0.016;
   bool isClick = false;
   bool isClickAfter = true;
+  String objType = 'ball';
 
   myBall(double xp, double yp, double xv, double yv, double br){
     xPos=xp;
@@ -206,10 +250,10 @@ class myBall{
   }
 
   void outVel(){
-    if(yVel.abs()<10){
+    if(yVel.abs()<6.6){
       yVel=0;
     }
-    if(xVel.abs()<10){
+    if(xVel.abs()<6.6){
       xVel=0;
     }
   }
