@@ -25,8 +25,11 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
   double accel = 1000;
   Timer? _timer;
 
+  List iPos = [];
+  List fPos = [];
 
   double timerMilllisecond = 0;
+  int longclickobj=0;
 
   @override
   void deactivate() {
@@ -59,11 +62,6 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
   @override
   Widget build(BuildContext context) {
 
-    List iPos = [];
-    List fPos = [];
-    double xV = 0;
-    double yV = 0;
-
     return Scaffold(
         appBar: AppBar(
           title: Text("Bounce!!"),
@@ -75,9 +73,9 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                   setState(() {
                     if (objList[i].isBallRegion(details.localPosition.dx, details.localPosition.dy)) {
                       objList[i].isClick=true;
-                      objList[i].stop();
-                      iPos.add(details.localPosition.dx);
-                      iPos.add(details.localPosition.dy);
+                      if (!objList[i].isLongClick) {
+                        objList[i].stop();
+                      }
                     }
                   });
                 }
@@ -92,45 +90,54 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                   }
                 }
               },
-              onTapUp: (details) {
 
+              onLongPressDown: (details) {
                 for(var i =0; i<objList.length; i++){
-                  if (objList[i].isClick) {
-
-                    _timer?.cancel();
-                    setState(() {
-                      fPos.add(details.localPosition.dx);
-                      fPos.add(details.localPosition.dy);
-                      print(timerMilllisecond);
-                      objList[i].xVel=(fPos[0]-iPos[0])/timerMilllisecond;
-                      objList[i].yVel=(fPos[1]-iPos[1])/timerMilllisecond;
-                      iPos=[];
-                      fPos=[];
-                      timerMilllisecond=0;
-                    });
-                  }
+                  setState(() {
+                    if (objList[i].isBallRegion(details.localPosition.dx, details.localPosition.dy)) {
+                      timerStart();
+                      print(details.localPosition);
+                      iPos.add(details.localPosition.dx);
+                      iPos.add(details.localPosition.dy);
+                      objList[i].isLongClick=true;
+                      longclickobj=i;
+                    }
+                  });
                 }
               },
+              onLongPressEnd: (details) {
+
+                  if (objList[longclickobj].isLongClick) {
+                    setState(() {
+
+                      print(details.localPosition);
+                      objList[longclickobj].xVel=(details.localPosition.dx-iPos[0])/(timerMilllisecond*0.001);
+                      objList[longclickobj].yVel=(details.localPosition.dy-iPos[1])/(timerMilllisecond*0.001);
+                      print(objList[longclickobj].xVel);
+                      objList[longclickobj].isLongClick=false;
+                      objList[longclickobj].isClick = false;
+
+                    });
+
+
+                }
+
+                iPos=[];
+                fPos=[];
+                timerMilllisecond=0;
+                timerPause();
+
+              },
+
 
               onVerticalDragUpdate: (details) {
                 for(var i =0; i<objList.length; i++){
                   if (objList[i].isClick) {
-
-
                     setState(() {
                       objList[i].setPosition(details.localPosition.dx, details.localPosition.dy);
                       objList[i].updateDraw();
                     });
 
-
-                    _timer = Timer.periodic(Duration(milliseconds: milliBaseTime), (timer) {
-                      if (this.mounted) {
-                        setState(() {
-                          timerMilllisecond++;
-                          //print(timerMilllisecond);
-                        });
-                      }
-                    });
                   }
                 }
               },
@@ -143,31 +150,32 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
 
                       if (!objList[i].isClick) {
 
-                        if (objList[i].yVel!=0 || objList[i].isClickAfter) {
-                          objList[i].addYvel(baseTime * accel);
-                          //objList[i].subYpos(0.5 * accel * pow(baseTime, 2) - objList[i].yVel * baseTime);
-                          objList[i].addYpos( objList[i].yVel * baseTime);
-                          objList[i].updateAnimation(_animationController.value);
-                          objList[i].isClickAfter=false;
-                          if ((objList[i].yVel* _animationController.value*baseTime + objList[i].yPos + objList[i].ballRad >= mapY)) {
-                            objList[i].mulYvel(-elasticConstant);
-                            //print("${newball.yVel}, ${newball.yPos}");
-                            objList[i].outVel();
+                          if (objList[i].yVel* _animationController.value*baseTime + objList[i].yPos + objList[i].ballRad < mapY) {
+                            objList[i].addYvel(baseTime * accel);
+                            //objList[i].subYpos(0.5 * accel * pow(baseTime, 2) - objList[i].yVel * baseTime);
+                            objList[i].addYpos( objList[i].yVel * baseTime);
+                            objList[i].updateAnimation(_animationController.value);
+                            objList[i].isClickAfter=false;
+                            if ((objList[i].yVel* _animationController.value*baseTime + objList[i].yPos + objList[i].ballRad >= mapY)) {
+                              objList[i].mulYvel(-elasticConstant);
+                              //print("${newball.yVel}, ${newball.yPos}");
+                              objList[i].outVel();
+                            }
+
+
+
+
+                            objList[i].addXpos( objList[i].xVel * baseTime);
+                            if ((objList[i].xVel* _animationController.value*baseTime + objList[i].xPos - objList[i].ballRad <=0)||(objList[i].xVel* _animationController.value*baseTime + objList[i].xPos + objList[i].ballRad >= mapX)) {
+
+                              objList[i].mulXvel(-elasticConstant);
+                              //print("${newball.yVel}, ${newball.yPos}");
+                              //objList[i].outVel();
+                            }
+                            objList[i].updateAnimation(_animationController.value);
                           }
-                        }
-
-                        if (objList[i].yVel!=0) {
-
-                          objList[i].addXpos( objList[i].xVel * baseTime);
-                          if ((objList[i].xVel* _animationController.value*baseTime + objList[i].xPos - objList[i].ballRad <=0)||(objList[i].xVel* _animationController.value*baseTime + objList[i].xPos + objList[i].ballRad >= mapX)) {
-
-                            objList[i].mulXvel(-elasticConstant);
-                            //print("${newball.yVel}, ${newball.yPos}");
-                            //objList[i].outVel();
-                          }
-                          objList[i].updateAnimation(_animationController.value);
                           //print(ball.xVel);
-                        }
+
 
 
                       }
@@ -189,7 +197,26 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
         )
     );
   }
+
+
+  void timerStart(){
+    _timer = Timer.periodic(Duration(milliseconds: milliBaseTime), (timer) {
+      if (this.mounted) {
+        setState(() {
+          timerMilllisecond++;
+          //print(timerMilllisecond);
+        });
+      }
+    });
+  }
+
+  void timerPause() {
+    _timer?.cancel();
+  }
+
 }
+
+
 
 void checkCollapse(List<dynamic> objList, double baseTime) {
   for(int i=0; i<objList.length; i++){
@@ -277,6 +304,7 @@ class physicsObject{
   double elasticConstant = 0.8;
   bool isClick = false;
   bool isClickAfter = true;
+  bool isLongClick = false;
 
   void addXpos(double x){
     xPos+=x;
