@@ -51,7 +51,7 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
 
   @override
   void dispose(){
-
+    _timer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -70,7 +70,7 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
         ),
         body: Center(
             child: GestureDetector(
-              onHorizontalDragDown: (details) {
+              onVerticalDragDown: (details) {
                 for(var i =0; i<objList.length; i++){
                   setState(() {
                     if (objList[i].isBallRegion(details.localPosition.dx, details.localPosition.dy)) {
@@ -82,22 +82,28 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                   });
                 }
               },
-              onHorizontalDragEnd: (details) {
+              onVerticalDragEnd: (details) {
                 for(var i =0; i<objList.length; i++){
                   if (objList[i].isClick) {
-                    print(fPos);
-
-
-                    _timer?.cancel();
-
                     setState(() {
-                      objList[i].xVel=(fPos[fPos.length-2]-iPos[0])/timerMilllisecond;
-                      objList[i].yVel=(fPos[fPos.length-1]-iPos[1])/timerMilllisecond;
-
                       objList[i].isClick = false;
                       objList[i].isClickAfter = true;
+                    });
+                  }
+                }
+              },
+              onTapUp: (details) {
 
+                for(var i =0; i<objList.length; i++){
+                  if (objList[i].isClick) {
 
+                    _timer?.cancel();
+                    setState(() {
+                      fPos.add(details.localPosition.dx);
+                      fPos.add(details.localPosition.dy);
+                      print(timerMilllisecond);
+                      objList[i].xVel=(fPos[0]-iPos[0])/timerMilllisecond;
+                      objList[i].yVel=(fPos[1]-iPos[1])/timerMilllisecond;
                       iPos=[];
                       fPos=[];
                       timerMilllisecond=0;
@@ -105,22 +111,25 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                   }
                 }
               },
-              onHorizontalDragUpdate: (details) {
+
+              onVerticalDragUpdate: (details) {
                 for(var i =0; i<objList.length; i++){
                   if (objList[i].isClick) {
+
+
                     setState(() {
                       objList[i].setPosition(details.localPosition.dx, details.localPosition.dy);
                       objList[i].updateDraw();
-                      print(details.localPosition.dx);
-                      fPos.add(details.localPosition.dx);
-                      fPos.add(details.localPosition.dy);
                     });
 
 
                     _timer = Timer.periodic(Duration(milliseconds: milliBaseTime), (timer) {
-                      setState(() {
-                        timerMilllisecond++;
-                      });
+                      if (this.mounted) {
+                        setState(() {
+                          timerMilllisecond++;
+                          //print(timerMilllisecond);
+                        });
+                      }
                     });
                   }
                 }
@@ -157,7 +166,7 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                             //objList[i].outVel();
                           }
                           objList[i].updateAnimation(_animationController.value);
-                          print(ball.xVel);
+                          //print(ball.xVel);
                         }
 
 
