@@ -13,12 +13,16 @@ class Physics extends StatefulWidget {
 class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
   bool isClick = false;
   bool isClickAfter = true;
-  double mapY = 300;
+  double mapY = 600;
   double mapX = 300;
   double elasticConstant = 0.7;
   List objList = [];
-  var ball = myBall(100, 100, 300, 0, 20, 1);
-  var newball = myBall(200, 100, 0, 0, 20, 1);
+  List pathList=[];
+  var ball = myBall(100, 100, 100, 0, 20, 1);
+  var ball3 = myBall(150, 100, 100, 0, 20, 1);
+  var newball = myBall(200, 100, -100, 0, 25, 1.5);
+
+
   late AnimationController _animationController;
   double baseTime = 0.016;
   int milliBaseTime = 16;
@@ -30,6 +34,7 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
 
   double timerMilllisecond = 0;
   int longclickobj=0;
+
 
   @override
   void deactivate() {
@@ -48,8 +53,15 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
         duration: Duration(milliseconds: 16)
     );
     _animationController.repeat();
+
     objList.add(ball);
+    objList.add(ball3);
     objList.add(newball);
+
+    for(var i=0; i<objList.length; i++){
+      pathList.add(objList[i].draw);
+    }
+
   }
 
   @override
@@ -96,7 +108,7 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                   setState(() {
                     if (objList[i].isBallRegion(details.localPosition.dx, details.localPosition.dy)) {
                       timerStart();
-                      print(details.localPosition);
+
                       iPos.add(details.localPosition.dx);
                       iPos.add(details.localPosition.dy);
                       objList[i].isLongClick=true;
@@ -110,12 +122,13 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                   if (objList[longclickobj].isLongClick) {
                     setState(() {
 
-                      print(details.localPosition);
-                      objList[longclickobj].xVel=(details.localPosition.dx-iPos[0])/(timerMilllisecond*0.001);
-                      objList[longclickobj].yVel=(details.localPosition.dy-iPos[1])/(timerMilllisecond*0.001);
-                      print(objList[longclickobj].xVel);
+
+                      objList[longclickobj].xVel=3*(details.localPosition.dx-iPos[0])/(0.7);
+                      objList[longclickobj].yVel=3*(details.localPosition.dy-iPos[1])/(0.7);
+
                       objList[longclickobj].isLongClick=false;
                       objList[longclickobj].isClick = false;
+                      objList[longclickobj].isClickAfter = true;
 
                     });
 
@@ -126,6 +139,19 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                 fPos=[];
                 timerMilllisecond=0;
                 timerPause();
+
+
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: const Text('Long Pressed Finish'),
+                    backgroundColor: Colors.indigoAccent,
+                    duration: const Duration(seconds: 1),
+                    action: SnackBarAction(
+                      label: 'Done',
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      },
+                    ),
+                  ));
 
               },
 
@@ -145,23 +171,25 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
               child: AnimatedBuilder(
                   animation: _animationController,
                   builder: (context, child) {
-
+                    checkCollapse(objList, baseTime);
                     for(var i =0; i<objList.length; i++){
 
                       if (!objList[i].isClick) {
 
-                          if (objList[i].yVel* _animationController.value*baseTime + objList[i].yPos + objList[i].ballRad < mapY) {
+                          if (objList[i].yVel!=0 || objList[i].isClickAfter) {
                             objList[i].addYvel(baseTime * accel);
                             //objList[i].subYpos(0.5 * accel * pow(baseTime, 2) - objList[i].yVel * baseTime);
                             objList[i].addYpos( objList[i].yVel * baseTime);
-                            objList[i].updateAnimation(_animationController.value);
+                            //objList[i].updateAnimation(_animationController.value);
+                            objList[i].updateDraw();
+
                             objList[i].isClickAfter=false;
                             if ((objList[i].yVel* _animationController.value*baseTime + objList[i].yPos + objList[i].ballRad >= mapY)) {
                               objList[i].mulYvel(-elasticConstant);
+                              objList[i].mulXvel(elasticConstant);
                               //print("${newball.yVel}, ${newball.yPos}");
                               objList[i].outVel();
                             }
-
 
 
 
@@ -169,26 +197,25 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                             if ((objList[i].xVel* _animationController.value*baseTime + objList[i].xPos - objList[i].ballRad <=0)||(objList[i].xVel* _animationController.value*baseTime + objList[i].xPos + objList[i].ballRad >= mapX)) {
 
                               objList[i].mulXvel(-elasticConstant);
-                              //print("${newball.yVel}, ${newball.yPos}");
+                              //print("${newball.yVel}, ${newball.yPos}");d
                               //objList[i].outVel();
                             }
-                            objList[i].updateAnimation(_animationController.value);
+                            objList[i].updateDraw();
+                            //objList[i].updateAnimation(_animationController.value);
                           }
                           //print(ball.xVel);
-
-
 
                       }
                     }
 
-                    checkCollapse(objList, baseTime);
+
 
                     return Container(
-                      width: 300,
-                      height: 300,
+                      width: mapX,
+                      height: mapY,
                       color: Colors.white70,
                       child: CustomPaint(
-                        painter: _paint(pathList: [ball.draw, newball.draw]),
+                        painter: _paint(pathList: [ball.draw, newball.draw, ball3.draw]),
                       ),
                     );
                   }
@@ -200,7 +227,7 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
 
 
   void timerStart(){
-    _timer = Timer.periodic(Duration(milliseconds: milliBaseTime), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (this.mounted) {
         setState(() {
           timerMilllisecond++;
@@ -214,51 +241,58 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
     _timer?.cancel();
   }
 
-}
+
+  void checkCollapse(List<dynamic> objList, double baseTime) {
+
+    for(int i=0; i<objList.length; i++){
+      for(int j=i+1; j<objList.length; j++){
+        if(objList[i].objType=='ball' && objList[j].objType=='ball'){
+          if(getDistance(objList[i], objList[j]) < (objList[i].ballRad + objList[j].ballRad)){
+
+            double vxi=objList[i].xVel;
+            double vxj=objList[j].xVel;
+            double vyi=objList[i].yVel;
+            double vyj=objList[j].yVel;
+            double eConstant = 1;
+
+            objList[i].xVel = (
+                (eConstant+1)*objList[j].mass*vxj+
+                    vxi * (objList[i].mass - eConstant * objList[j].mass)
+            )/
+                (objList[i].mass + objList[j].mass);
+
+            objList[j].xVel = (
+                (eConstant+1)*objList[i].mass*vxi +
+                    vxj* (objList[j].mass - eConstant * objList[i].mass)
+            )/
+                (objList[i].mass + objList[j].mass);
+
+            objList[i].yVel = (
+                (eConstant+1)*objList[j].mass*vyj +
+                    vyi* (objList[i].mass - eConstant * objList[j].mass)
+            )/
+                (objList[i].mass + objList[j].mass);
+
+            objList[j].yVel = (
+                (eConstant+1)*objList[i].mass*vyi +
+                    vyj * (objList[j].mass - eConstant * objList[i].mass)
+            )/
+                (objList[i].mass + objList[j].mass);
 
 
-
-void checkCollapse(List<dynamic> objList, double baseTime) {
-  for(int i=0; i<objList.length; i++){
-    for(int j=i+1; j<objList.length; j++){
-      if(objList[i].objType=='ball' && objList[j].objType=='ball'){
-        if(getDistance(objList[i], objList[j]) < (objList[i].ballRad + objList[j].ballRad)){
-          print("collapse");
-          print("1 I ${objList[i].xVel}, ${objList[i].yVel}, J ${objList[j].xVel}, ${objList[j].yVel}");
-          objList[i].xVel = (
-              (objList[i].elasticConstant+1)*objList[j].mass*objList[j].xVel +
-                  objList[i].xVel * (objList[i].mass - objList[i].elasticConstant * objList[j].mass)
-          )/
-              (objList[i].mass + objList[j].mass);
-
-          objList[j].xVel = (
-              (objList[j].elasticConstant+1)*objList[i].mass*objList[i].xVel +
-                  objList[j].xVel * (objList[j].mass - objList[i].elasticConstant * objList[i].mass)
-          )/
-              (objList[i].mass + objList[j].mass);
-
-          objList[i].yVel = (
-              (objList[i].elasticConstant+1)*objList[j].mass*objList[j].yVel +
-                  objList[i].yVel * (objList[i].mass - objList[i].elasticConstant * objList[j].mass)
-          )/
-              (objList[i].mass + objList[j].mass);
-
-          objList[j].yVel = (
-              (objList[j].elasticConstant+1)*objList[i].mass*objList[i].yVel +
-                  objList[j].yVel * (objList[j].mass - objList[i].elasticConstant * objList[i].mass)
-          )/
-              (objList[i].mass + objList[j].mass);
-
-
-          print("2 I ${objList[i].xVel}, ${objList[i].yVel}, J ${objList[j].xVel}, ${objList[j].yVel}");
+          }
 
         }
-
       }
     }
+
   }
 
 }
+
+
+
+
 
 
 double getDistance(physicsObject obj1, physicsObject obj2){
@@ -301,7 +335,7 @@ class physicsObject{
   double yVel = 0;
   double mass = 1;
   double baseTime = 0.016;
-  double elasticConstant = 0.8;
+  double elasticConstant = 1;
   bool isClick = false;
   bool isClickAfter = true;
   bool isLongClick = false;
