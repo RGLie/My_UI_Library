@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -14,12 +15,26 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
   bool isClickAfter = true;
   double mapY = 300;
   double mapX = 300;
+  double elasticConstant = 0.7;
   List objList = [];
-  var ball = myBall(100, 100, 300, 0, 20);
-  var newball = myBall(200, 100, 0, 0, 30);
+  var ball = myBall(100, 100, 300, 0, 20, 1);
+  var newball = myBall(200, 100, 0, 0, 20, 1);
   late AnimationController _animationController;
   double baseTime = 0.016;
+  int milliBaseTime = 16;
   double accel = 1000;
+  Timer? _timer;
+
+
+  double timerMilllisecond = 0;
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    _timer?.cancel();
+    super.deactivate();
+
+  }
 
   @override
   void initState() {
@@ -36,12 +51,19 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
 
   @override
   void dispose(){
+
     _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+
+    List iPos = [];
+    List fPos = [];
+    double xV = 0;
+    double yV = 0;
+
     return Scaffold(
         appBar: AppBar(
           title: Text("Bounce!!"),
@@ -54,6 +76,8 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                     if (objList[i].isBallRegion(details.localPosition.dx, details.localPosition.dy)) {
                       objList[i].isClick=true;
                       objList[i].stop();
+                      iPos.add(details.localPosition.dx);
+                      iPos.add(details.localPosition.dy);
                     }
                   });
                 }
@@ -61,9 +85,22 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
               onHorizontalDragEnd: (details) {
                 for(var i =0; i<objList.length; i++){
                   if (objList[i].isClick) {
+                    print(fPos);
+
+
+                    _timer?.cancel();
+
                     setState(() {
+                      objList[i].xVel=(fPos[fPos.length-2]-iPos[0])/timerMilllisecond;
+                      objList[i].yVel=(fPos[fPos.length-1]-iPos[1])/timerMilllisecond;
+
                       objList[i].isClick = false;
                       objList[i].isClickAfter = true;
+
+
+                      iPos=[];
+                      fPos=[];
+                      timerMilllisecond=0;
                     });
                   }
                 }
@@ -74,6 +111,16 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
                     setState(() {
                       objList[i].setPosition(details.localPosition.dx, details.localPosition.dy);
                       objList[i].updateDraw();
+                      print(details.localPosition.dx);
+                      fPos.add(details.localPosition.dx);
+                      fPos.add(details.localPosition.dy);
+                    });
+
+
+                    _timer = Timer.periodic(Duration(milliseconds: milliBaseTime), (timer) {
+                      setState(() {
+                        timerMilllisecond++;
+                      });
                     });
                   }
                 }
@@ -82,40 +129,42 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
               child: AnimatedBuilder(
                   animation: _animationController,
                   builder: (context, child) {
+
                     for(var i =0; i<objList.length; i++){
+
                       if (!objList[i].isClick) {
 
                         if (objList[i].yVel!=0 || objList[i].isClickAfter) {
                           objList[i].addYvel(baseTime * accel);
-                          objList[i].subYpos(0.5 * accel * pow(baseTime, 2) - objList[i].yVel * baseTime);
+                          //objList[i].subYpos(0.5 * accel * pow(baseTime, 2) - objList[i].yVel * baseTime);
+                          objList[i].addYpos( objList[i].yVel * baseTime);
                           objList[i].updateAnimation(_animationController.value);
                           objList[i].isClickAfter=false;
-                          if ((objList[i].yVel>=0)&&(objList[i].yVel* _animationController.value*baseTime + objList[i].yPos + objList[i].ballRad >= mapY)) {
-                            objList[i].mulYvel(-0.7);
+                          if ((objList[i].yVel* _animationController.value*baseTime + objList[i].yPos + objList[i].ballRad >= mapY)) {
+                            objList[i].mulYvel(-elasticConstant);
                             //print("${newball.yVel}, ${newball.yPos}");
                             objList[i].outVel();
                           }
                         }
 
                         if (objList[i].yVel!=0) {
-                          print(ball.xVel);
+
                           objList[i].addXpos( objList[i].xVel * baseTime);
                           if ((objList[i].xVel* _animationController.value*baseTime + objList[i].xPos - objList[i].ballRad <=0)||(objList[i].xVel* _animationController.value*baseTime + objList[i].xPos + objList[i].ballRad >= mapX)) {
 
-                            objList[i].mulXvel(-0.8);
+                            objList[i].mulXvel(-elasticConstant);
                             //print("${newball.yVel}, ${newball.yPos}");
                             //objList[i].outVel();
-                            objList[i].updateAnimation(_animationController.value);
                           }
+                          objList[i].updateAnimation(_animationController.value);
+                          print(ball.xVel);
                         }
 
-                        checkCollapse(objList);
+
                       }
-
-
-
                     }
 
+                    checkCollapse(objList, baseTime);
 
                     return Container(
                       width: 300,
@@ -133,17 +182,53 @@ class _PhysicsState extends State<Physics> with SingleTickerProviderStateMixin{
   }
 }
 
-bool checkCollapse(List<dynamic> objList) {
+void checkCollapse(List<dynamic> objList, double baseTime) {
   for(int i=0; i<objList.length; i++){
-    for(int j=i; j<objList.length; j++){
+    for(int j=i+1; j<objList.length; j++){
       if(objList[i].objType=='ball' && objList[j].objType=='ball'){
-        
+        if(getDistance(objList[i], objList[j]) < (objList[i].ballRad + objList[j].ballRad)){
+          print("collapse");
+          print("1 I ${objList[i].xVel}, ${objList[i].yVel}, J ${objList[j].xVel}, ${objList[j].yVel}");
+          objList[i].xVel = (
+              (objList[i].elasticConstant+1)*objList[j].mass*objList[j].xVel +
+                  objList[i].xVel * (objList[i].mass - objList[i].elasticConstant * objList[j].mass)
+          )/
+              (objList[i].mass + objList[j].mass);
+
+          objList[j].xVel = (
+              (objList[j].elasticConstant+1)*objList[i].mass*objList[i].xVel +
+                  objList[j].xVel * (objList[j].mass - objList[i].elasticConstant * objList[i].mass)
+          )/
+              (objList[i].mass + objList[j].mass);
+
+          objList[i].yVel = (
+              (objList[i].elasticConstant+1)*objList[j].mass*objList[j].yVel +
+                  objList[i].yVel * (objList[i].mass - objList[i].elasticConstant * objList[j].mass)
+          )/
+              (objList[i].mass + objList[j].mass);
+
+          objList[j].yVel = (
+              (objList[j].elasticConstant+1)*objList[i].mass*objList[i].yVel +
+                  objList[j].yVel * (objList[j].mass - objList[i].elasticConstant * objList[i].mass)
+          )/
+              (objList[i].mass + objList[j].mass);
+
+
+          print("2 I ${objList[i].xVel}, ${objList[i].yVel}, J ${objList[j].xVel}, ${objList[j].yVel}");
+
+        }
+
       }
     }
   }
-  return true;
 
 }
+
+
+double getDistance(physicsObject obj1, physicsObject obj2){
+  return sqrt(pow(obj1.xPos-obj2.xPos, 2) + pow(obj1.yPos-obj2.yPos, 2));
+}
+
 
 class _paint extends CustomPainter {
   final List pathList;
@@ -173,35 +258,16 @@ class _paint extends CustomPainter {
 }
 
 
-class myBall{
-  late double xPos;
-  late double yPos;
-  late double xVel;
-  late double yVel;
-  late double ballRad;
-  late Path draw;
+class physicsObject{
+  double xPos = 0;
+  double yPos = 0;
+  double xVel = 0;
+  double yVel = 0;
+  double mass = 1;
   double baseTime = 0.016;
+  double elasticConstant = 0.8;
   bool isClick = false;
   bool isClickAfter = true;
-  String objType = 'ball';
-
-  myBall(double xp, double yp, double xv, double yv, double br){
-    xPos=xp;
-    yPos = yp;
-    xVel = xv;
-    yVel = yv;
-    ballRad = br;
-    draw=Path();
-    for(double i=0; i<ballRad-1; i++){
-      draw.addOval(Rect.fromCircle(
-          center: Offset(
-              xPos, yPos
-          ),
-          radius: i
-      ));
-    }
-  }
-
 
   void addXpos(double x){
     xPos+=x;
@@ -262,9 +328,36 @@ class myBall{
     xPos=x;
     yPos=y;
   }
+}
+
+
+
+class myBall extends physicsObject{
+  late double ballRad;
+  late Path draw;
+  String objType = 'ball';
+
+  myBall(double xp, double yp, double xv, double yv, double br, double m){
+    super.xPos=xp;
+    super.yPos = yp;
+    super.xVel = xv;
+    super.yVel = yv;
+    super.mass = m;
+    ballRad = br;
+    draw=Path();
+    for(double i=0; i<ballRad-1; i++){
+      draw.addOval(Rect.fromCircle(
+          center: Offset(
+              super.xPos, super.yPos
+          ),
+          radius: i
+      ));
+    }
+  }
+
 
   bool isBallRegion(double checkX, double checkY){
-    if((pow(xPos-checkX, 2)+pow(yPos-checkY, 2))<=pow(ballRad, 2)){
+    if((pow(super.xPos-checkX, 2)+pow(super.yPos-checkY, 2))<=pow(ballRad, 2)){
       return true;
     }
     return false;
@@ -275,8 +368,8 @@ class myBall{
     for(double i=0; i<ballRad-1; i++){
       draw.addOval(Rect.fromCircle(
           center: Offset(
-            xPos,
-            yPos,
+            super.xPos,
+            super.yPos,
           ),
           radius: i
       ));
@@ -288,8 +381,8 @@ class myBall{
     for(double i=0; i<ballRad-1; i++){
       draw.addOval(Rect.fromCircle(
           center: Offset(
-            xPos + animationValue*xVel*baseTime,
-            yPos + animationValue*yVel*baseTime,
+            super.xPos + animationValue*xVel*baseTime,
+            super.yPos + animationValue*yVel*baseTime,
           ),
           radius: i
       ));
